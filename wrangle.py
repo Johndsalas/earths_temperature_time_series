@@ -1,6 +1,8 @@
 
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 def cel_to_fah(value):
     
     return (value*2) + 30
@@ -42,3 +44,20 @@ def tvt_split(df_land,df_ocean):
     test_ocean = df_ocean['2005-01-01':]
 
     return train_land, validate_land, test_land, train_ocean, validate_ocean, test_ocean
+
+
+def show_split(train_land, validate_land, test_land, train_ocean, validate_ocean, test_ocean):
+
+    plt.figure(figsize = (12,4))
+    plt.title("Average Land Temperature Train, Validate, and Test Data")
+    plt.plot(train_land.index, train_land.LandAverageTemperature)
+    plt.plot(validate_land.index, validate_land.LandAverageTemperature)
+    plt.plot(test_land.index, test_land.LandAverageTemperature)
+    plt.show()
+
+    plt.figure(figsize = (12,4))
+    plt.title("Average Land and Ocean Temperature Train, Validate, and Test Data")
+    plt.plot(train_ocean.index, train_ocean.LandAndOceanAverageTemperature)
+    plt.plot(validate_ocean.index, validate_ocean.LandAndOceanAverageTemperature)
+    plt.plot(test_ocean.index, test_ocean.LandAndOceanAverageTemperature)
+    plt.show()
