@@ -15,7 +15,7 @@ def append(model_type, target_var, rmse, eval_df):
     return eval_df.append(d, ignore_index = True)
 
 
-def plot_and_eval(train, validate, test, yhat, target_var, model_type):
+def plot_and_eval(train, validate, yhat, target_var, model_type):
     plt.figure(figsize = (12,4))
     plt.plot(train[target_var], label = 'Train', linewidth = 1)
     plt.plot(validate[target_var], label = 'Validate', linewidth = 1)
@@ -28,7 +28,7 @@ def plot_and_eval(train, validate, test, yhat, target_var, model_type):
     return rmse
 
 
-def last_observed_value(train, validate, test, target_var, eval_df):
+def last_observed_value(train, validate, target_var, eval_df):
 
     model_type = "Last Observed Value"
 
@@ -41,7 +41,8 @@ def last_observed_value(train, validate, test, target_var, eval_df):
 
     return eval_df
 
-def simple_average(train, validate, test, target_var, eval_df):
+
+def simple_average(train, validate, target_var, eval_df):
 
     model_type = "Simple Average"
 
@@ -50,6 +51,59 @@ def simple_average(train, validate, test, target_var, eval_df):
 
     rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
 
+    eval_df = append(model_type, target_var, rmse, eval_df)
+
+    return eval_df
+
+def moving_average(train, validate, target_var, eval_df):
+
+    index = 0
+
+    label =['One Month', 'One Year', 'One Decade']
+
+    for period in [1,12,120]:
+
+        model_type = f"Moving Average {label[index]}"
+     
+        temps = round(train[target_var].rolling(period).mean().iloc[-1],4)
+        yhat = pd.DataFrame({target_var: [temps]}, index = validate.index)
+       
+        rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+       
+        eval_df = append(model_type, target_var, rmse, eval_df)
+
+        index += 1
+
+        return eval_df
+
+def holts(train, validate, target_var, eval_df):
+
+    model_type = "Holt's Linear Trend"
+
+    model = Holt(train[target_var], exponential = False)
+    model = model.fit(smoothing_level = .1,
+                      smoothing_slope = .1,
+                      optimized = False)
+    
+    temps = model.predict(start = validate.index[0], end = validate.index[-1])
+
+    yhat = pd.DataFrame({target_var: '1'}, index = validate.index)
+    yhat[target_var] = round(temps,4)
+
+    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+        
+    eval_df = append(model_type, target_var, rmse, eval_df)
+
+    return eval_df
+
+def next_cycle(train, train_cycle, validate, target_var, eval_df):
+
+    yhat = train_cycle_land + train_land.diff(365).mean()
+
+    yhat.index = validate_land.index
+
+    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+        
     eval_df = append(model_type, target_var, rmse, eval_df)
 
     return eval_df
