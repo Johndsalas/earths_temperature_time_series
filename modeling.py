@@ -1,5 +1,6 @@
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 import statsmodels.api as sm
@@ -35,7 +36,7 @@ def last_observed_value(train, validate, target_var, eval_df):
     temps = train[target_var][-1:][0]
     yhat= pd.DataFrame({target_var : [temps]}, index = validate.index)
 
-    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type) 
+    rmse = plot_and_eval(train, validate, yhat, target_var, model_type) 
 
     eval_df = append(model_type, target_var, rmse, eval_df)
 
@@ -49,7 +50,7 @@ def simple_average(train, validate, target_var, eval_df):
     temps = round(train[target_var].mean(),4)
     yhat = pd.DataFrame({target_var: [temps]}, index = validate.index)
 
-    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+    rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
 
     eval_df = append(model_type, target_var, rmse, eval_df)
 
@@ -68,15 +69,15 @@ def moving_average(train, validate, target_var, eval_df):
         temps = round(train[target_var].rolling(period).mean().iloc[-1],4)
         yhat = pd.DataFrame({target_var: [temps]}, index = validate.index)
        
-        rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+        rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
        
         eval_df = append(model_type, target_var, rmse, eval_df)
 
         index += 1
 
-        return eval_df
+    return eval_df
 
-def holts(train, validate, target_var, eval_df):
+def holt(train, validate, target_var, eval_df):
 
     model_type = "Holt's Linear Trend"
 
@@ -90,7 +91,7 @@ def holts(train, validate, target_var, eval_df):
     yhat = pd.DataFrame({target_var: '1'}, index = validate.index)
     yhat[target_var] = round(temps,4)
 
-    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+    rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
         
     eval_df = append(model_type, target_var, rmse, eval_df)
 
@@ -98,11 +99,32 @@ def holts(train, validate, target_var, eval_df):
 
 def next_cycle(train, train_cycle, validate, target_var, eval_df):
 
-    yhat = train_cycle_land + train_land.diff(365).mean()
+    model_type = "Predict Next Cycle"
 
-    yhat.index = validate_land.index
+    yhat = train_cycle + train.diff(365).mean()
 
-    rmse = plot_and_eval(train, validate, test, yhat, target_var, model_type)
+    yhat.index = validate.index
+
+    rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
+        
+    eval_df = append(model_type, target_var, rmse, eval_df)
+
+    return eval_df
+
+
+def holt_winter(train, validate, target_var, eval_df):
+
+    model_type = "Holt Winters"
+
+    model = ExponentialSmoothing(np.asarray(train[target_var]) ,seasonal_periods=12 ,trend='add', seasonal='add',)
+
+    model = model.fit()
+
+    yhat = pd.DataFrame({target_var: '1'}, index = validate.index)
+    yhat_items = model.forecast(len(yhat))
+    yhat[target_var] = yhat_items
+
+    rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
         
     eval_df = append(model_type, target_var, rmse, eval_df)
 
