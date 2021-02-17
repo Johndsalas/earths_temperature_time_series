@@ -22,7 +22,25 @@ def plot_land_exploration(train_land):
     plt.show
 
 
-def show_explore(train_land, train_ocean):
+def plot_land_ocean_explore(train_ocean):
+
+    plt.figure(figsize = (12,4))
+    plt.title("Average Temperature by Month")
+    plt.plot(train_ocean)
+    plt.show
+
+    plt.figure(figsize = (12,4))
+    plt.title("Average Temperature by Year")
+    plt.plot(train_ocean.resample('y').mean())
+    plt.show
+
+    plt.figure(figsize = (12,4))
+    plt.title("Average Temperature by Decade")
+    plt.plot(train_ocean.resample('10y').mean())
+    plt.show
+
+
+def compare_plot(train_land, train_ocean):
 
     plt.figure(figsize = (12,4))
     plt.title("Average Temperature by Month")

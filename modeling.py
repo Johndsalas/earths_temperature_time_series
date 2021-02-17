@@ -64,7 +64,7 @@ def moving_average(train, validate, target_var, eval_df):
 
     for period in [1,12,120]:
 
-        model_type = f"Moving Average {label[index]}"
+        model_type = f"{label[index]} Moving Average "
      
         temps = round(train[target_var].rolling(period).mean().iloc[-1],4)
         yhat = pd.DataFrame({target_var: [temps]}, index = validate.index)
@@ -114,7 +114,7 @@ def next_cycle(train, train_cycle, validate, target_var, eval_df):
 
 def holt_winter(train, validate, target_var, eval_df):
 
-    model_type = "Holt Winters"
+    model_type = "Holt Winter"
 
     model = ExponentialSmoothing(np.asarray(train[target_var]) ,seasonal_periods=12 ,trend='add', seasonal='add',)
 
@@ -127,5 +127,13 @@ def holt_winter(train, validate, target_var, eval_df):
     rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
         
     eval_df = append(model_type, target_var, rmse, eval_df)
+
+    return eval_df
+
+def get_baseline(train, validate, target_var, eval_df):
+
+    eval_df = last_observed_value(train, validate, target_var, eval_df)
+    eval_df = simple_average(train, validate, target_var, eval_df)
+    eval_df = moving_average(train, validate, target_var, eval_df)
 
     return eval_df
