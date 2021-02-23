@@ -167,3 +167,5 @@ def get_prophet(train, validate, target_var, eval_df):
     rmse = plot_and_eval(train, validate, yhat, target_var, model_type)
 
     eval_df = append(model_type, target_var, rmse, eval_df)
+
+    return eval_df
