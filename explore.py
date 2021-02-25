@@ -46,18 +46,21 @@ def compare_plot(train_land, train_ocean):
     plt.title("Average Temperature by Month")
     plt.plot(train_land)
     plt.plot(train_ocean)
+    plt.legend(["Land Only", "Land and Ocean"])
     plt.show
 
     plt.figure(figsize = (12,4))
     plt.title("Average Temperature by Year")
     plt.plot(train_land.resample('y').mean())
     plt.plot(train_ocean.resample('y').mean())
+    plt.legend(["Land Only", "Land and Ocean"],loc='upper left')
     plt.show
 
     plt.figure(figsize = (12,4))
     plt.title("Average Temperature by Decade")
     plt.plot(train_land.resample('10y').mean())
     plt.plot(train_ocean.resample('10y').mean())
+    plt.legend(["Land Only", "Land and Ocean"],loc='upper left')
     plt.show
 
 def show_sesonal_decomp(train_land, validate_land, test_land, train_ocean, validate_ocean, test_ocean):
